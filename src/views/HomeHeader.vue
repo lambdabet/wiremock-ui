@@ -56,7 +56,7 @@ const changeProject = (id: string) => {
 
 // 每次加载添加默认服务器
 onMounted(() => {
-  const defaultServer = window.appconfig?.defaultServer as IProject[]
+  const defaultServer = window.appConfig?.defaultServer as IProject[]
   if(!defaultServer || defaultServer.length === 0) return
   const defaultSevIds = defaultServer.map(s => s.id)
   const projItems = projects.value.filter(item => !defaultSevIds.includes(item.id))

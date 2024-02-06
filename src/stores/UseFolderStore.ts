@@ -91,14 +91,14 @@ const createFolderMapping = (mockUrl: string): Promise<IFolderTree[]> => {
  */
 const updateFolderMapping = (mockUrl: string, treeData: IFolderTree[]) => {
     const param = generateMappingParam(treeData)
-    U_Mapping(mockUrl, param.uuid, param)
+    U_Mapping(mockUrl, param.uuid as string, param)
 }
 
 /**
  * folder tree mapping的元数据
  * @param treeData
  */
-const generateMappingParam = (treeData) => {
+const generateMappingParam = (treeData: any) => {
     return {
         "id": "00000000-0000-0000-0000-000000000000",
         "name": "本UI使用，请勿删除",

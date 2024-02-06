@@ -4,7 +4,7 @@
             :readonly="selectedItem!.metadata.render.request.urlMatchType === 'any'">
             <template #prepend>
                 <el-form-item prop="request.method" style="width: 70px">
-                    <el-select v-model="selectedItem!.request.method">
+                    <el-select v-model="selectedItem!.request.method" style="width: 110px">
                         <el-option v-for="(item, index) in $enum.REQUEST_METHOD" :value="item" :key="index"></el-option>
                     </el-select>
                 </el-form-item>

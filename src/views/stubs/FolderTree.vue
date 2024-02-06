@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type {TreeNodeData} from "element-plus/es/components/tree/src/tree.type";
 import type Node from 'element-plus/es/components/tree/src/model/node'
 import {type IFolderTree, UseFolderStore} from "@/stores/UseFolderStore";
 import {ref} from "vue";
@@ -11,11 +12,8 @@ const folderStore = UseFolderStore()
 const {currentFolder, folderTree, folderFlat} = storeToRefs(folderStore)
 
 // 为当前节点添加选中样式
-const currentNodeClass = (data: IFolderTree, node: Node) => {
-  if (getFolderPath(node) === currentFolder.value) {
-    return 'is-selected'
-  }
-  return null
+const currentNodeClass = (data: TreeNodeData, node: Node) => {
+  return getFolderPath(node) === currentFolder.value ? 'is-selected' : ''
 }
 
 // 文件夹节点点击，选中或取消->设置或取消store currentFolder
@@ -26,7 +24,7 @@ const handleFolderNodeClick = (data: IFolderTree, node: Node) => {
 }
 
 // 获取一个节点从顶端到当前节点的完整路径
-const getFolderPath = (n: Node) => n.level >= 1 ? getFolderPath(n.parent) + '/' + n.data.label : ''
+const getFolderPath: any = (n: Node) => n.level >= 1 ? getFolderPath(n.parent) + '/' + n.data.label : ''
 
 // 新增文件夹
 const addFolder = () => {
@@ -47,6 +45,7 @@ const addFolder = () => {
     let child = folderTree.value
     for (let i = 1; i < pathArray.length; i++) {
       const node = child.find(n => n.label === pathArray[i])
+      if(!node) throw new Error('folder path not exist: ' + currentFolder.value)
       if(!node.children) node.children = []
       child = node.children
     }
@@ -65,7 +64,7 @@ const deleteCurrent = () => {
     if (i === pathArray.length-1) {
       child.splice(idx, 1)
     } else {
-      child = child[idx].children
+      child = child[idx].children || []
     }
   }
   currentFolder.value = ''

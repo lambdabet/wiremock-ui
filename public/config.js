@@ -1,5 +1,5 @@
 (function () {
-    window.appconfig = {
+    window.appConfig = {
         defaultServer: [
 
         ]
