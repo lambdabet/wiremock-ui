@@ -35,9 +35,10 @@
 </template>
 
 <script lang="ts" setup>
+import {onMounted} from 'vue'
 import logoSrc from '@/assets/wireMockLogo.png'
 import Projects from './projects/Projects.vue';
-import {useProjectsStore} from '@/stores/UseProjectsStore';
+import {type IProject, useProjectsStore} from '@/stores/UseProjectsStore';
 import {storeToRefs} from 'pinia';
 import {useShareStatesStore} from '@/stores/UseShareStatesStore';
 
@@ -52,6 +53,17 @@ const changeProject = (id: string) => {
     const currentItem = projects.value.find((item) => item.id === id)
     currentMockUrl.value = currentItem ? currentItem.url : ''
 }
+
+// 每次加载添加默认服务器
+onMounted(() => {
+  const defaultServer = window.appconfig?.defaultServer as IProject[]
+  if(!defaultServer || defaultServer.length === 0) return
+  const defaultSevIds = defaultServer.map(s => s.id)
+  const projItems = projects.value.filter(item => !defaultSevIds.includes(item.id))
+  projItems.unshift(...defaultServer)
+  projects.value = projItems
+  changeProject(defaultSevIds[0])
+})
 
 const clearSelected = () => {
     currentProjectId.value = ''

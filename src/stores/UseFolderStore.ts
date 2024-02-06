@@ -63,7 +63,6 @@ const createFolderMapping = (mockUrl: string): Promise<IFolderTree[]> => {
         const paths = (res.mappings as Array<any> || [])
             .map((item: any) => item.metadata?.wmui.folder as string || '')
             .sort((a ,b) => a.localeCompare(b))
-        console.log('====>>>', paths)
         // 将存储path映射为tree
         for (const path of paths) {
             const array = path.split('/')
