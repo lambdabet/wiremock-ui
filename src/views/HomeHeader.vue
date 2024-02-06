@@ -35,13 +35,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
 import logoSrc from '@/assets/wireMockLogo.png'
-import axios from 'axios'
 import Projects from './projects/Projects.vue';
-import { useProjectsStore } from '@/stores/UseProjectsStore';
-import { storeToRefs } from 'pinia';
-import { useShareStatesStore } from '@/stores/UseShareStatesStore';
+import {useProjectsStore} from '@/stores/UseProjectsStore';
+import {storeToRefs} from 'pinia';
+import {useShareStatesStore} from '@/stores/UseShareStatesStore';
 
 const store = useProjectsStore()
 const { projects } = storeToRefs(store);
@@ -85,16 +83,17 @@ const goToGitHub = () => {
         .logo {
             height: 15px;
         }
-    
+
         .el-select {
             margin-left: 20px;
             margin-right: 10px;
             width: 230px;
         }
-    
+
         .el-menu.el-menu--horizontal {
             border-bottom: none;
-    
+            height: inherit;
+
             .el-menu-item {
                 height: 40px;
             }

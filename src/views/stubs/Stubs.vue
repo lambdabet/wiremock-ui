@@ -42,11 +42,16 @@
             </el-row>
 
             <!-- 内容显示区 -->
-            <!-- 无内容时显示 -->
-            <div class="empty-data" v-if="!tableData.length">暂无数据，请先添加</div>
-            <!-- 有内容时显示 -->
-            <div v-else>
-                <el-row>
+            <el-row>
+              <!--文件夹区-->
+              <el-col :span="3" class="left-tree">
+                <folder-tree/>
+              </el-col>
+              <el-col :span="21">
+                <!-- 无内容时显示 -->
+                <div class="empty-data" v-if="!tableData.length">暂无数据，请先添加</div>
+                <!-- 有内容时显示 -->
+                <el-row v-else>
                     <!-- 左侧 Stub Mappings 列表 -->
                     <el-col :span="5" class="left-list">
                         <!-- 分页信息及翻页功能 -->
@@ -165,10 +170,10 @@
                                     :expand-depth=10></json-viewer>
                             </div>
                         </el-scrollbar>
-
                     </el-col>
                 </el-row>
-            </div>
+              </el-col>
+            </el-row>
         </div>
     </div>
 </template>
@@ -183,15 +188,25 @@ import { ElMessage, ElMessageBox, type Action, type FormRules } from 'element-pl
 import { isEmpty, formatDateTime, cloneJson } from '@/lib/helper'
 import { ErrorHandler } from '@/lib/axios'
 import { useShareStatesStore } from '@/stores/UseShareStatesStore'
-import { type IStubMapping, R_Mappings, R_Mapping, C_Mapping, U_Mapping, D_Mapping } from '@/service/api/StubMappings'
+import {
+  type IStubMapping,
+  R_Mappings,
+  R_Mapping,
+  C_Mapping,
+  U_Mapping,
+  D_Mapping,
+  R_MappingByFolder
+} from '@/service/api/StubMappings'
 import { methodStyle } from '@/service/render/style'
 import { apiDataToRenderData } from '@/service/render/convert/apiDataToRenderData'
 import { renderDataToApiData } from '@/service/render/convert/renderDataToApiData'
 
+import FolderTree from "@/views/stubs/FolderTree.vue";
 import StatusTag from '../components/StatusTag.vue'
 import GeneralInfo from './GeneralInfo.vue'
 import Request from './Request.vue'
 import Response from './Response.vue'
+import {UseFolderStore} from "@/stores/UseFolderStore";
 const Webhook = defineAsyncComponent(() =>
     import('./Webhook.vue')
 )
@@ -206,13 +221,21 @@ const pageSize = ref(10)
 const fromNum = computed(() => (pageNum.value - 1) * pageSize.value + (total ? 1 : 0))
 const toNum = computed(() => (pageNum.value * pageSize.value) > total.value ? total.value : (pageNum.value * pageSize.value))
 
+const folderStore = UseFolderStore()
+const { currentFolder } = storeToRefs(folderStore)
+
 /**
  * 根据 offset 和 limit 查询
  */
 const getStubMappings = async (isUserAction: boolean) => {
-    await R_Mappings(currentMockUrl.value, { offset: (pageNum.value - 1) * pageSize.value, limit: pageSize.value }).then((res: any) => {
+  await (currentFolder.value ? R_MappingByFolder(currentMockUrl.value, currentFolder.value) :
+      R_Mappings(currentMockUrl.value, {
+        offset: (pageNum.value - 1) * pageSize.value,
+        limit: pageSize.value
+      }))
+      .then((res: any) => {
         tableData.value = (res.mappings || []).map((item: any) => {
-            return apiDataToRenderData(item);
+          return apiDataToRenderData(item);
         });
         total.value = res.meta.total
         selectedItem.value = total.value > 0 ? tableData.value[0] : {}
@@ -220,14 +243,14 @@ const getStubMappings = async (isUserAction: boolean) => {
         isShowFormEdit.value = true
         resetItem.value = cloneJson(selectedItem.value)
         if (isUserAction) {
-            ElMessage({
-                type: 'success',
-                message: '刷新成功',
-            })
+          ElMessage({
+            type: 'success',
+            message: '刷新成功',
+          })
         }
-    }).catch(err => {
+      }).catch(err => {
         ErrorHandler.create(err).end()
-    })
+      })
 }
 
 // ###### 页面加载和监听 ######
@@ -235,15 +258,21 @@ const getStubMappings = async (isUserAction: boolean) => {
 onBeforeMount(() => {
     if (!isEmpty(currentMockUrl.value)) {
         getStubMappings(false)
+        folderStore.initFolderTreeValue(currentMockUrl.value)
     }
 })
 
 watch(currentMockUrl, (newValue, oldValue) => {
     if (currentMockUrl.value) {
         getStubMappings(false)
+        folderStore.initFolderTreeValue(currentMockUrl.value)
     } else {
         tableData.value = []
     }
+})
+
+watch(currentFolder, () => {
+    getStubMappings(false)
 })
 
 // ###### 1. 顶部工具栏 ######
@@ -313,7 +342,12 @@ const addStubMapping = () => {
             method: 'GET',
             url: '/example'
         },
-        response: {}
+        response: {},
+        metadata: {
+          wmui: {
+            folder: currentFolder
+          }
+        }
     });
     tableData.value.unshift(item);
     switchSelectedItem(0)
@@ -339,9 +373,9 @@ const isUnsave = computed(() => (item: IStubMapping) => {
 
 /**
  * 本地搜索，筛选列表中符合查询条件的列表项。
- * 
+ *
  * 如果参数符合查询条件，则返回 true。
- * 
+ *
  * @param item 当前列表项数据
  */
 const listFilter = ref('')
@@ -352,7 +386,7 @@ const localSearch = (item: any) => {
 
 /**
  * 上一页、下一页
- * 
+ *
  * 当当前页码改变时重新查询
  * @param currentPageNum 当前页码
  */
@@ -431,7 +465,7 @@ const resetStubMapping = () => {
 
 /**
  * 删除当前选中的 StubMapping。
- * 
+ *
  * 如果是草稿项，直接移除；否则根据 ID 删除。
  */
 const deleteStubMappingByID = () => {
@@ -670,13 +704,17 @@ const switchSelectedItem = (nextIndex: number) => {
     }
 }
 
+.left-tree {
+  padding-left: 10px;
+}
+
 // 左侧列表
 .left-list {
 
     text-align: left;
     margin: 0px;
     padding: 0px;
-    padding-left: 10px;
+    //padding-left: 10px;
 
     // 分页
     .list-pagination {
@@ -706,6 +744,7 @@ const switchSelectedItem = (nextIndex: number) => {
         padding: 0;
         margin: 0;
         border: 1px solid #dfdfdf;
+        border-left: none;
         font-size: 0;
         float: left;
 

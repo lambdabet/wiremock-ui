@@ -5,6 +5,11 @@
     <el-form-item label="名称" prop="name">
         <el-input v-model="selectedItem!.name"></el-input>
     </el-form-item>
+    <el-form-item label="保存位置" prop="folder">
+      <el-select v-model="selectedItem!.metadata.wmui.folder" placeholder="请选择文件夹">
+        <el-option v-for="item in folderFlat" :value="item" :key="item"></el-option>
+      </el-select>
+    </el-form-item>
     <el-form-item label="优先级" prop="priority">
         <el-select v-model="selectedItem!.priority">
             <el-option v-for="item in $enum.PRIORITY" :value="item" :key="item"></el-option>
@@ -43,8 +48,10 @@ import { storeToRefs } from 'pinia';
 
 import { useShareStatesStore } from '@/stores/UseShareStatesStore'
 import $enum from '@/service/const/stubEnum'
+import {UseFolderStore} from "@/stores/UseFolderStore";
 
 const { selectedItem } = storeToRefs(useShareStatesStore())
+const { folderFlat } = storeToRefs(UseFolderStore())
 </script>
 
 <style lang="less" scoped>
