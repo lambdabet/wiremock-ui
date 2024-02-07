@@ -6,7 +6,7 @@
         <el-input v-model="selectedItem!.name"></el-input>
     </el-form-item>
     <el-form-item label="保存位置" prop="folder">
-      <el-select v-model="selectedItem!.metadata.wmui.folder" placeholder="请选择文件夹">
+      <el-select v-model="selectedItem!.metadata.wmui.folder" placeholder="请选择文件夹" clearable>
         <el-option v-for="item in folderFlat" :value="item" :key="item"></el-option>
       </el-select>
     </el-form-item>

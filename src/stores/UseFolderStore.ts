@@ -101,7 +101,7 @@ const updateFolderMapping = (mockUrl: string, treeData: IFolderTree[]) => {
 const generateMappingParam = (treeData: any) => {
     return {
         "id": "00000000-0000-0000-0000-000000000000",
-        "name": "本UI使用，请勿删除",
+        "name": "wiremock-ui自动生成，请勿删除",
         "request": {
             "urlPath": "/__wiremock-ui/folders",
             "method": "POST"

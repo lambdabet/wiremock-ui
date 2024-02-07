@@ -47,7 +47,7 @@
               <el-col :span="3" class="left-tree">
                 <folder-tree/>
               </el-col>
-              <el-col :span="21">
+              <el-col :span="21" v-loading="loading">
                 <!-- 无内容时显示 -->
                 <div class="empty-data" v-if="!tableData.length">暂无数据，请先添加</div>
                 <!-- 有内容时显示 -->
@@ -215,6 +215,7 @@ const WebhookAddButton = defineAsyncComponent(() =>
 )
 
 const { currentMockUrl, selectedItem, selectedIndex, currentStubMappingID, resetItem } = storeToRefs(useShareStatesStore())
+const loading = ref(false)
 const tableData = ref([] as any[])
 const pageNum = ref(1)
 const pageSize = ref(10)
@@ -228,6 +229,7 @@ const { currentFolder } = storeToRefs(folderStore)
  * 根据 offset 和 limit 查询
  */
 const getStubMappings = async (isUserAction: boolean) => {
+  loading.value = true
   await (currentFolder.value ? R_MappingByFolder(currentMockUrl.value, currentFolder.value) :
       R_Mappings(currentMockUrl.value, {
         offset: (pageNum.value - 1) * pageSize.value,
@@ -250,7 +252,7 @@ const getStubMappings = async (isUserAction: boolean) => {
         }
       }).catch(err => {
         ErrorHandler.create(err).end()
-      })
+      }).finally(() => loading.value = false)
 }
 
 // ###### 页面加载和监听 ######
