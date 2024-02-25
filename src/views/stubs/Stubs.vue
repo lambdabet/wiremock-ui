@@ -347,7 +347,7 @@ const addStubMapping = () => {
         response: {},
         metadata: {
           wmui: {
-            folder: currentFolder
+            folder: currentFolder.value
           }
         }
     });

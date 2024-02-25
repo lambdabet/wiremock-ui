@@ -32,21 +32,17 @@ export const UseFolderStore = defineStore('folderStore', () => {
      * 若不存在，调用全部mapping，从metadata中生成folder tree并保存到指定的接口中
      */
     const initFolderTreeValue = (mockUrl: string) => {
-        getFolders(mockUrl).then((data: IFolderTree[]) => {
+        getFolders(mockUrl).catch(() => {
+            return createFolderMapping(mockUrl)
+        }).then((data: IFolderTree[]) => {
             folderTree.value = data
-        }).catch((err: any) => {
-            if (err.code === 'ERR_BAD_REQUEST') {
-                return createFolderMapping(mockUrl).then(data => folderTree.value = data)
-            } else {
-                ErrorHandler.create(err).end()
-            }
         }).then(() => {
             watch(folderTree, (newVal) => {
                 updateFolderMapping(mockUrl, newVal)
             }, { deep: true })
+        }).catch((err: any) => {
+            ErrorHandler.create(err).end()
         })
-
-
     }
     return {currentFolder, folderTree, folderFlat, initFolderTreeValue}
 })
