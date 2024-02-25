@@ -390,19 +390,19 @@ export const R_Mapping = (mockUrl: string, mappingUUID: string) => {
 };
 
 /**
- * 查询指定【 mockUrl 】中，指定【 forder 】的 mapping 信息
+ * 查询指定【 mockUrl 】中，指定【 folder 】的 mapping 信息
  * @param mockUrl
- * @param forder
+ * @param folder
  * @returns {*}
  */
-export const R_MappingByFolder = (mockUrl: string, forder: string) => {
+export const R_MappingByFolder = (mockUrl: string, folder: string) => {
   return httpSingle({
     url: `${mockUrl}/__admin/mappings/find-by-metadata`,
     method: 'post',
     data: {
       matchesJsonPath: {
         expression: '$.wmui.folder',
-        matches: '^' + forder + '$'
+        matches: '^' + folder + '$'
       }
     }
   });
