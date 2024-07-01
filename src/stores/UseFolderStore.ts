@@ -1,8 +1,11 @@
-import {defineStore} from "pinia";
-import {computed, ref, watch} from "vue";
+import {defineStore, storeToRefs} from "pinia";
+import {computed, ref} from "vue";
 import {getFolders} from "@/service/api/Folders";
 import {ErrorHandler} from "@/lib/axios";
 import {type IStubMapping, C_Mapping, U_Mapping, R_MappingByFolder} from "@/service/api/StubMappings";
+import {useShareStatesStore} from "@/stores/UseShareStatesStore";
+
+const {currentMockUrl} = storeToRefs(useShareStatesStore())
 
 export interface IFolderTree {
     label: string // 文件夹名称
@@ -13,7 +16,17 @@ export const UseFolderStore = defineStore('folderStore', () => {
     // 当前选中的folder
     const currentFolder = ref('')
     // 全部folder tree数据
-    const folderTree = ref([] as IFolderTree[])
+    const treeData = ref([] as IFolderTree[])
+    const folderTree = computed({
+        get() {
+            return treeData.value
+        },
+        set(val) {
+            console.log('===>>>set', val)
+            treeData.value = val
+            updateFolderMapping(currentMockUrl.value, val)
+        }
+    })
 
     // 奖folder tree扁平化处理，用于新增接口时选择
     const flatTree: any = (tree: IFolderTree[], parent = '') => {
@@ -35,11 +48,7 @@ export const UseFolderStore = defineStore('folderStore', () => {
         getFolders(mockUrl).catch(() => {
             return createFolderMapping(mockUrl)
         }).then((data: IFolderTree[]) => {
-            folderTree.value = data
-        }).then(() => {
-            watch(folderTree, (newVal) => {
-                updateFolderMapping(mockUrl, newVal)
-            }, { deep: true })
+            treeData.value = data
         }).catch((err: any) => {
             ErrorHandler.create(err).end()
         })
@@ -58,7 +67,7 @@ const createFolderMapping = (mockUrl: string): Promise<IFolderTree[]> => {
         const tree: IFolderTree[] = []
         const paths = (res.mappings as Array<any> || [])
             .map((item: any) => item.metadata?.wmui.folder as string || '')
-            .sort((a ,b) => a.localeCompare(b))
+            .sort((a, b) => a.localeCompare(b))
         // 将存储path映射为tree
         for (const path of paths) {
             const array = path.split('/')
@@ -110,5 +119,5 @@ const generateMappingParam = (treeData: any) => {
             }
         },
         "uuid": "00000000-0000-0000-0000-000000000000"
-    }  as IStubMapping
+    } as IStubMapping
 }

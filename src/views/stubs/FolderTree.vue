@@ -42,7 +42,8 @@ const addFolder = () => {
     }
   }).then(({value}) => {
     const pathArray = currentFolder.value.split('/')
-    let child = folderTree.value
+    const treeData = [...folderTree.value]
+    let child = treeData
     for (let i = 1; i < pathArray.length; i++) {
       const node = child.find(n => n.label === pathArray[i])
       if(!node) throw new Error('folder path not exist: ' + currentFolder.value)
@@ -51,6 +52,8 @@ const addFolder = () => {
     }
     child.push({label: value})
     child.sort((a, b) => a.label.localeCompare(b.label))
+    // 数组内部改变不能被监听到的问题
+    folderTree.value = treeData
   }).catch(() => {
   })
 }
@@ -58,7 +61,8 @@ const addFolder = () => {
 // 删除当前选中的文件夹
 const deleteCurrent = () => {
   const pathArray = currentFolder.value.split('/')
-  let child = folderTree.value
+  const treeData = [...folderTree.value]
+  let child = treeData
   for (let i = 1; i < pathArray.length; i++) {
     const idx = child.findIndex(n => n.label === pathArray[i])
     if (i === pathArray.length-1) {
@@ -67,6 +71,8 @@ const deleteCurrent = () => {
       child = child[idx].children || []
     }
   }
+  // 数组内部改变不能被监听到的问题
+  folderTree.value = treeData
   currentFolder.value = ''
 }
 </script>
