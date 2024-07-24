@@ -124,6 +124,8 @@
                                 </el-popconfirm>
                                 <el-button :icon="CopyDocument" type="success" @click="cloneStubMapping"
                                     v-if="!isUnsave(selectedItem)">副本</el-button>
+                                <el-button :icon="Position" type="primary" @click="testLink"
+                                           v-if="selectedItem.request.method==='GET'">访问</el-button>
                             </el-form>
                         </div>
                         <!-- Form Edit/JSON View 切换 -->
@@ -182,7 +184,7 @@
 import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref, reactive, watch, defineAsyncComponent, h } from 'vue';
 import { computed } from '@vue/reactivity';
-import { Search, Plus, Refresh, RefreshLeft, Right, Finished, Delete, CopyDocument } from '@element-plus/icons-vue'
+import { Search, Plus, Refresh, RefreshLeft, Right, Finished, Delete, CopyDocument, Position } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox, type Action, type FormRules } from 'element-plus';
 
 import { isEmpty, formatDateTime, cloneJson } from '@/lib/helper'
@@ -497,6 +499,14 @@ const cloneStubMapping = () => {
     delete cloneItem.uuid
     tableData.value.unshift(cloneItem);
     switchSelectedItem(0)
+}
+
+/**
+ * GET类型链接在浏览器访问
+ */
+const testLink = () => {
+  const path = selectedItem.value?.request.url || selectedItem.value?.request.urlPath
+  window.open(currentMockUrl.value + path, '_blank')
 }
 
 // 3.2 JSON 预览
